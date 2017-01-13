@@ -1,7 +1,7 @@
-function [] = secondpart_ash()
+function [] = secondpart_ash1()
 
 %% Initialization
-redThresh = 0.25; % Threshold for red detection
+redThresh = 0.2; % Threshold for red detection
 vidDevice = imaq.VideoDevice('winvideo', 1, 'YUY2_640x480', ... % Acquire input video stream
                     'ROI', [1 1 640 480], ...         %ROI is region of interest specified in [x y width height], width height being the resolution of cam
                     'ReturnedColorSpace', 'rgb');               % rgb colour format required, by default it is Ycbr
@@ -33,17 +33,23 @@ hVideoIn = vision.VideoPlayer('Name', 'Final Video', ... % Output video player
                                 'Position', [100 100 vidInfo.MaxWidth+20 vidInfo.MaxHeight+30]);
 nFrame = 0; % Frame number initialization
 
-LB = 150;   %upper lower limit for red area detected
+LB = 250;   %upper lower limit for red area detected
 UB = 1000;
+filename = 'centroid.txt';
+delimiterIn = ' ';
+format long g;  %to get decimal points as in the text file, otherwise MATLAB formats it
+A = importdata(filename,delimiterIn);
+
 %% Processing Loop
 while(nFrame < 300)
-     rgbFrame = step(vidDevice); % Acquire single frame
+    pause(0.5); 
+    rgbFrame = step(vidDevice); % Acquire single frame
      
   %  rgbFrame = flipdim(rgbFrame,2); % obtain the mirror image for displaying
     diffFrame = imsubtract(rgbFrame(:,:,1), rgb2gray(rgbFrame)); % Get red component of the image
     diffFrame = medfilt2(diffFrame, [3 3]); % Filter out the noise by using median filter
     binFrame = im2bw(diffFrame, redThresh); % Convert the image into binary image with the red objects as white 
-    binFrame = xor(bwareaopen(binFrame,LB),  bwareaopen(binFrame,UB));  % NEW CHANGE. CHECK scrapcolor.m
+   % binFrame = xor(bwareaopen(binFrame,LB),  bwareaopen(binFrame,UB));  % NEW CHANGE. CHECK scrapcolor.m
     [centroid, bbox] = step(hblob, binFrame); % Get the centroids and bounding boxes of the blobs
     centroid = (centroid); % Convert the centroids into Integer for further steps 
     rgbFrame(1:20,1:165,:) = 0; % put a black region on the output stream, size of the black region
@@ -54,10 +60,11 @@ while(nFrame < 300)
         disp(centX);
         disp(centY);
         vidIn = step(htextinsCent, vidIn, [uint16(centX) uint16(centY)], [uint16(centX-6) uint16(centY-9)]);  %required to convert in this format for next step
-        compare_ash(centX,centY)
+        compare_ash1(centX,centY,A)
     end
     vidIn = step(htextins, vidIn, uint8(length(bbox(:,1)))); % Count the number of blobs
     step(hVideoIn, vidIn); % Output video stream
+    pause(0.25);
     
     nFrame = nFrame+1;
 end

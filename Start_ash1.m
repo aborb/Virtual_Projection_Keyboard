@@ -17,8 +17,6 @@ imwrite(I,'C:\Users\Ashmita\Downloads\Major Project\image.jpg');
 
 
 %% Convert to grayscale image
-%I=imread('keyboard final.jpg'); 
-
 Igray = rgb2gray(I);
    
  
@@ -31,12 +29,12 @@ BW = im2bw(Igray,0.567);
 %% Feature Extraction
 st = regionprops(not(BW), 'BoundingBox', 'Area', 'Centroid' );  %notBW for detecting black boxes as bounding box typically detects white boxes. Inverting clr
 disp(st);
-disp(length(st)); % =86 out of which actual number of keys are 53
+disp(length(st)); % =86 out of which actual number of keys are 27
 x=0;              % x is the serial number of centroid
 fileID = fopen('centroid.txt','w');
 
 for k = 1 : length(st)
-    if(st(k).Area>500&&st(k).Area<15000)   %condition given to select only boxes with above 500pixels in the region and neglect smaller boxes
+    if(st(k).Area>300&&st(k).Area<60000)   %condition given to select only boxes with above 1000pixels in the region and neglect smaller boxes
         thisBB = st(k).BoundingBox;
         rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)],...     % st(k).Bounding Box = X Y W H
             'EdgeColor','r','LineWidth',2 )
@@ -46,7 +44,7 @@ for k = 1 : length(st)
         x=x+1;
         fprintf('Centroid number= %g ',k)
         fprintf('Sno= %g',x);
-        disp(st(k).Centroid);   % 53 centroids, X Y
+        disp(st(k).Centroid);   % 27 centroids, X Y
         
         x_centroid(k) = st(k).Centroid(1);  %extracting coordiantes and saving in a text file
         y_centroid(k) = st(k).Centroid(2);
@@ -59,12 +57,13 @@ fclose(fileID);
 delete(v); %deleting the "videoinput" object to avoid filling up of memory
 
 
-prompt = 'Proceed to Step 2? [Y/N] Check the output. Number of detected centroids should be 53 \n';
+
+
+prompt = 'Proceed to Step 2? [Y/N] Check the output. Number of detected centroids should be 27 \n';
 str = input(prompt,'s');
 if (str=='Y')
-    secondpart_ash()
+    secondpart_ash1()
 end
-
 % Coordinates of Centroids are stored in centroid.txt in the
 % format --: k, X, Y  (k is the centroid number representing areas above 1000 pixels.
 % Orginally 86 were detected out of which only 53 are revelant. k shows
